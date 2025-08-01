@@ -1,4 +1,4 @@
-aws ec2 describe-instances --query 'Reservations[].Instances[].InstanceId'
-aws ec2 describe-instances --query 'Reservations[].Instances[].State.Name'
-( sleep 3 && aws ec2 start-instances --instance-ids $(<id-instance.txt) & ) & ./console.py $(<id-instance.txt)
-( sleep 10 && aws ec2 stop-instances --instance-ids $(<id-instance.txt) & ) & ./console.py $(<id-instance.txt)
+aws ec2 describe-instances --output text --query 'Reservations[].Instances[].State.Name'
+aws ec2 describe-instances --output text --query 'Reservations[].Instances[].InstanceId' > id-instance.txt
+( sleep 3 && aws ec2 start-instances --instance-ids $(<id-instance.txt) & ) & ./console_test.py $(<id-instance.txt)
+( sleep 10 && aws ec2 stop-instances --instance-ids $(<id-instance.txt) & ) & ./console_test.py $(<id-instance.txt)
