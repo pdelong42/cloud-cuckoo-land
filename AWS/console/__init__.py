@@ -82,7 +82,7 @@ class ConsoleToInstance:
         private_key = paramiko.RSAKey.generate( 3072 )
         public_key = private_key.get_base64()
 
-        preprint( f"Uploading ephemeral public key to instance {instanceId} (ctrl-c to abort)" )
+        preprint( f"Uploading ephemeral public key to instance {instanceId} (ctrl-c to abort)... " )
 
         while True:
             try:
