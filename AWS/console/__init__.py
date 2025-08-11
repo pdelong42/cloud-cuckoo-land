@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+# First major bug after modularizing this: usage of sys.exit() is
+# wildly inappropriate.  ToDo: fix this.
+
 import sys
 import tty
 import time
