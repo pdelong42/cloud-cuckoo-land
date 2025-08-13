@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import time
 import boto3
 
 # This library is in the current directory.  I don't know if that's
@@ -10,19 +11,22 @@ import boto3
 #
 from console import ConsoleToInstance
 
+from threading import Thread
+
 # I'll write better arg processing later (I'm sure Python has a mod)
 if 2 != len( sys.argv ):
     print( "ERROR: please provide an instance ID as the first (and only) arg" )
     sys.exit()
 
 instanceId = sys.argv.pop()
+console_thread = Thread( target = ConsoleToInstance, args = [ instanceId ] )
+
+console_thread.start()
+time.sleep( 3 )
 
 session = boto3.session.Session()
 client = session.client( service_name='ec2' )
-
 response = client.start_instances( InstanceIds = [ instanceId ] )
 
 for x in response[ 'StartingInstances' ]:
-    print( f'Transitioning instance {x['InstanceId']} from {x['PreviousState']['Name']} to {x['CurrentState']['Name']}' )
-
-ConsoleToInstance( instanceId )
+    print( f'\nTransitioning instance {x['InstanceId']} from {x['PreviousState']['Name']} to {x['CurrentState']['Name']}' )
