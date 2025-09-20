@@ -15,15 +15,6 @@ passhash = crypt( getpass( f'Choose a password to use for \'{username}\': ' ) )
 session = boto3.session.Session()
 client = session.client( service_name = 'ec2' )
 
-# I already enabled serial for this subaccount, but I'm leaving it
-# here in the comments in case I need to do it again later.
-#
-#response = client.get_serial_console_access_status()
-#print( dumps( response, default = str ) )
-#
-#response = client.enable_serial_console_access()
-#print( dumps( response, default = str ) )
-
 response = client.describe_images(
     Filters = [
         {
@@ -52,6 +43,10 @@ response = client.run_instances(
 #    ResourceType='instance,Tags=[{Key=Name,Value=soup2nuts}]',
 #    MetadataOptions='HttpTokens=required,InstanceMetadataTags=enabled'
 
+# I should probably loop over that numerical index, rather than
+# hard-coding it.  But it's not obvious how I'd do that *and* hook-up
+# a console to each one (if there should be more than one).
+#
 instanceId = response[ 'Instances' ][0][ 'InstanceId' ]
 
 print( f'Created instance {instanceId}' )
