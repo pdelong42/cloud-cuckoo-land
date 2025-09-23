@@ -76,7 +76,7 @@ class ConsoleToInstance:
 
         session = boto3.session.Session()
 
-        client = session.client( service_name='ec2-instance-connect' )
+        client = session.client( service_name = 'ec2-instance-connect' )
         region = session.region_name
 
         private_key = paramiko.RSAKey.generate( 3072 )
