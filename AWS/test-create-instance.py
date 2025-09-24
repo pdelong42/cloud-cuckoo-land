@@ -32,6 +32,7 @@ AMI = response[ 'Images' ][0][ 'ImageId' ]
 # ToDo: pick an instance type which will support a serial console
 # be careful, this actually works; and we don't want to create instances until we have more parameters defined (I think)
 response = client.run_instances(
+    IamInstanceProfile = {'Name':'Baseline'},
     ImageId = AMI, # required
     MaxCount = 1,  # required
     MinCount = 1,  # required
