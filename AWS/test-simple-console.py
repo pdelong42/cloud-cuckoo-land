@@ -1,19 +1,21 @@
 #!/usr/bin/python
 
+import os
 import sys
 
-# This library is in the current directory.  I don't know if that's
-# what Python considers a "best pracice", but it feels gross to me.
-# But I'm going to do that until I find a better way to do library
-# path management in this runtime.
-#
+# yes, I'm bending over backwards to put stuff in 'lib' and keep using hyphens, so sue me...
+component = os.path.dirname( sys.argv[0] )
+sys.path.append( f'./{component}/lib/cloud-cuckoo-land/AWS' )
+
 from console import ConsoleToInstance
+from tagtable import Instances
 
 # I'll write better arg processing later (I'm sure Python has a mod)
 if 2 != len( sys.argv ):
-    print( "ERROR: please provide an instance ID as the first (and only) arg" )
+    print( "ERROR: please provide an instance Name tag as the first (and only) arg" )
     sys.exit()
 
-instanceId = sys.argv.pop()
+instanceTable = Instances()
+instanceId = instanceTable.IDs[ sys.argv.pop() ]
 
 ConsoleToInstance( instanceId )
