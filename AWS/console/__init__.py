@@ -167,8 +167,8 @@ class ConsoleToInstance:
 
 # Notes (just the regular kind, no feet involved):
 
-# It really bugs the crap out of me that I've been able to narrow the
-# timings on things as much as AWS will let me, but I still can't
+# It really bugs the crap out of me that I've been unable to narrow
+# the timings on things as much as AWS will let me, but I still can't
 # catch those first kernel messages from the bootup process.  And I've
 # looked for whether there is a way to inject an artificial delay into
 # the bootloader, before it actually loads the kernel (so that the
