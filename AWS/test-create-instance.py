@@ -9,8 +9,8 @@ from getpass import getpass
 from threading import Thread
 from console import ConsoleToInstance
 
-username = 'doubleu'
-passhash = crypt( getpass( f'Choose a password to use for \'{username}\': ' ) )
+username = 'somebody'
+passhash = crypt( getpass( f'Choose a password to use for the user named \'{username}\': ' ) )
 
 session = boto3.session.Session()
 client = session.client( service_name = 'ec2' )
