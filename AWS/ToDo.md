@@ -14,11 +14,11 @@
    should start with a newline, but right now it's just a tilde
    followed by a dot.
 
- - Create some basic roles and instance-profiles which have a minimum
-   set of policies to allow contact with SSM and CloudWatch.
-
  - Create an instance and a VPC that only use IPv6.
 
  - Create an instance that uses Fedora.
 
  - Create an instance that uses ARM (Graviton?).
+
+ - [DONE] Create some basic roles and instance-profiles which have a
+   minimum set of policies to allow contact with SSM and CloudWatch.
