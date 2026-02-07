@@ -8,7 +8,9 @@
    print( dumps( response, default = str ) )
 
  - I should fork ConsoleToInstance() into two versions:
-   InteractiveConsoleToInstance() and RecordConsoleToFile()
+   InteractiveConsoleToInstance() and RecordConsoleToFile(); or
+   perhaps instead make a more general class which optionally writes
+   to a file.
 
  - Fix the escape sequence that breaks-out of the SSH session.  It
    should start with a newline, but right now it's just a tilde
@@ -19,6 +21,8 @@
  - Create an instance that uses Fedora.
 
  - Create an instance that uses ARM (Graviton?).
+
+ - Move tests into their own subfolder.
 
  - [DONE] Create some basic roles and instance-profiles which have a
    minimum set of policies to allow contact with SSM and CloudWatch.
