@@ -1,3 +1,5 @@
+ - Make a library module for spinning-up a new instance.
+
  - Write a script to check for console access, and enable it if it's
    not already:
 
