@@ -3,49 +3,41 @@
 import sys
 import boto3
 
-#from pprint import pp
 from json import dumps
+from amiuniq import UniqueMachineImage
 
-session = boto3.session.Session()
-client = session.client( service_name = 'ec2' )
+#umi = UniqueMachineImage( {
+#    'architecture': 'x86_64',
+#    'creation-date': '2026-01-*',
+#    'name': 'RHEL-*',
+#    'owner-id': '309956199498'
+#} )
 
-date_prefix = '2026-02'
-name_prefix = 'al2023-ami'
-owner_alias = 'amazon'
+umi = UniqueMachineImage( {
+    'architecture': 'arm64',
+    'creation-date': '2026-01-22T*',
+    'name': 'al2023-ami-minimal-2023.10.*-kernel-6.12-*',
+    'owner-id': '137112412989'
+} )
 
-response = client.describe_images(
-    Filters = [
-        {
-            'Name' : 'creation-date',
-            'Values' : [ f'{date_prefix}*' ]
-        },
-        {
-            'Name' : 'name',
-            'Values' : [ f'{name_prefix}*' ]
-        },
-        {
-            'Name' : 'owner-alias',
-            'Values' : [ owner_alias ]
-        }
-    ],
-    IncludeDeprecated = True,
-    IncludeDisabled = True
-)
+if 1 > umi.size:
+    print( "ABORT: no match found" )
+    sys.exit( 1 )
 
-for i in response[ 'Images' ]:
+if 0 < umi.size:
+    print( umi.ID )
+
+if not 1 < umi.size:
+    sys.exit( 0 )
+
+print( dumps( umi.images, default = str ), file = sys.stderr )
+
+print( "extra matches..." )
+
+for i in umi.images:
     AMI = i[ 'ImageId' ]
-    description = i[ 'Description' ]
     name = i[ 'Name' ]
-    region = i[ 'SourceImageRegion' ]
-    #print( f'region = {region}' )
-    print( f'description = {description}' )
-    #print( f'name = {name}' )
+    print( f'name = {name}' )
     #print( f'AMI = {AMI}; name = {name}' )
 
-print( dumps( response[ 'Images' ], default = str ), file = sys.stderr )
-
 #            'Values' : [ 'al2023-ami-2023.7.20250527.1-kernel-6.1-x86_64' ]
-
-# This test looks for Amazon Linux AMIs, but I should write one for
-# other distros too (like RHEL and Fedora).
-
