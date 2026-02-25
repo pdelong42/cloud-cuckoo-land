@@ -2,56 +2,34 @@
 
 import boto3
 
-#from pprint import pp
 #from json import dumps
 from crypt import crypt
 from getpass import getpass
 from threading import Thread
 from console import ConsoleToInstance
+from amiuniq import UniqueMachineImage
+from instantiate import CreateSingleton
 
 username = 'somebody'
 passhash = crypt( getpass( f'Choose a password to use for the user named \'{username}\': ' ) )
 
-session = boto3.session.Session()
-client = session.client( service_name = 'ec2' )
+UMI = UniqueMachineImage( {
+    'architecture': 'x86_64',
+    'creation-date': '2026-01-22T*',
+    'name': 'al2023-ami-minimal-2023.10.*-kernel-6.12-*',
+    'owner-id': '137112412989' } )
 
-response = client.describe_images(
-    Filters = [
-        {
-            'Name' : 'name',
-            'Values' : [ 'al2023-ami-2023.7.20250527.1-kernel-6.1-x86_64' ]
-        }
-    ],
-    IncludeDeprecated = True,
-    IncludeDisabled = True
-)
-
-# we only care about the first one, so picking zero-index
-AMI = response[ 'Images' ][0][ 'ImageId' ]
-
-# ToDo: pick an instance type which will support a serial console
-# be careful, this actually works; and we don't want to create instances until we have more parameters defined (I think)
-response = client.run_instances(
-    IamInstanceProfile = {'Name':'Baseline'},
-    ImageId = AMI, # required
-    MaxCount = 1,  # required
-    MinCount = 1,  # required
-    UserData = f'#!/bin/bash\n\nuseradd -g wheel -p \'{passhash}\' {username}',
-)
-
-#    SubnetId='',
-#    InstanceType='t3.large',
-#    ResourceType='instance,Tags=[{Key=Name,Value=soup2nuts}]',
-#    MetadataOptions='HttpTokens=required,InstanceMetadataTags=enabled'
-
-# I should probably loop over that numerical index, rather than
-# hard-coding it.  But it's not obvious how I'd do that *and* hook-up
-# a console to each one (if there should be more than one).
+# ImageID is required
 #
-instanceId = response[ 'Instances' ][0][ 'InstanceId' ]
+uno = CreateSingleton(
+    'soup2nuts',
+    IamInstanceProfile = {'Name':'Baseline'},
+    ImageId = UMI.ID,
+    UserData = f'#!/bin/bash\n\nuseradd -g wheel -p \'{passhash}\' {username}'
+)
 
-print( f'Created instance {instanceId}' )
+print( f'Created instance {uno.ID}' )
 
-console_thread = Thread( target = ConsoleToInstance, args = [ instanceId ] )
+console_thread = Thread( target = ConsoleToInstance, args = [ uno.ID ] )
 
 console_thread.start()

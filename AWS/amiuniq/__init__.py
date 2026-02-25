@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import sys
 import boto3
 
 class UniqueMachineImage:
@@ -36,5 +35,5 @@ class UniqueMachineImage:
         if self.size > 1:
             print( f'WARNING: too many results ({self.size}) from unique AMI search (filter too broad?) - only returning top one' )
 
-        self.image = self.images.pop( 0 )
+        self.image = self.images.pop()
         self.ID    = self.image[ 'ImageId' ]
