@@ -12,21 +12,27 @@ import boto3
 from console import ConsoleToInstance
 
 from threading import Thread
+from tagtable import Instances
 
-# I'll write better arg processing later (I'm sure Python has a mod)
 if 2 != len( sys.argv ):
-    print( "ERROR: please provide an instance ID as the first (and only) arg" )
+    print( "ERROR: please provide a Name tag as the first (and only) arg" )
     sys.exit()
 
-instanceId = sys.argv.pop()
+NameTag = sys.argv.pop()
+instanceTable = Instances()
+instanceId = instanceTable.IDs[ NameTag ]
 console_thread = Thread( target = ConsoleToInstance, args = [ instanceId ] )
 
 console_thread.start()
 time.sleep( 3 )
 
-session = boto3.session.Session()
-client = session.client( service_name='ec2' )
+client = boto3.session.Session().client( service_name = 'ec2' )
 response = client.stop_instances( InstanceIds = [ instanceId ] )
 
 for x in response[ 'StoppingInstances' ]:
-    print( f'\nTransitioning instance {x['InstanceId']} from {x['PreviousState']['Name']} to {x['CurrentState']['Name']}' )
+
+    iid = x[ 'InstanceId' ]
+    prev = x[ 'PreviousState' ][ 'Name' ]
+    curr = x[  'CurrentState' ][ 'Name' ]
+
+    print( f'\nTransitioning instance {iid} from {prev} to {curr}' )

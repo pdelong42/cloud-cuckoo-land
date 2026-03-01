@@ -60,8 +60,6 @@ class DestroySingleton:
 
         response = client.terminate_instances( InstanceIds = [ instanceId ] )
 
-        #print( dumps( response, default = str ) )
-
         self.instances = response[ 'TerminatingInstances' ]
         self.size      = len( self.instances )
 
@@ -74,6 +72,14 @@ class DestroySingleton:
 
         self.instance = self.instances.pop()
         self.ID       = self.instance[ 'InstanceId' ]
+
+        for x in response[ 'TerminatingInstances' ]:
+
+            iid = x[ 'InstanceId' ]
+            prev = x[ 'PreviousState' ][ 'Name' ]
+            curr = x[  'CurrentState' ][ 'Name' ]
+
+            print( f'\nTransitioning instance {iid} from {prev} to {curr}' )
 
         response = client.delete_tags( Resources = [ instanceId ] )
 

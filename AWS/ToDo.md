@@ -33,6 +33,9 @@
 
  - Move tests into their own subfolder.
 
+ - use imagebuilder(?) to create a modified AMI with a non-zero menu
+   timeout in grub;
+
  - [DONE] Make a library module for spinning-up a new instance.
 
  - [DONE] Create some basic roles and instance-profiles which have a
