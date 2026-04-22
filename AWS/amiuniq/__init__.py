@@ -14,16 +14,14 @@ class UniqueMachineImage:
             filters.append( f )
 
         self.ID = ''
+        self.name = ''
         self.image = {}
         self.images = []
         self.size = 0
 
         client = boto3.session.Session().client( service_name = 'ec2' )
 
-        response = client.describe_images(
-            Filters = filters,
-            IncludeDeprecated = True,
-            IncludeDisabled = True )
+        response = client.describe_images( Filters = filters )
 
         self.images = response[ 'Images' ]
         self.size = len( self.images )
@@ -37,3 +35,4 @@ class UniqueMachineImage:
 
         self.image = self.images.pop()
         self.ID    = self.image[ 'ImageId' ]
+        self.name  = self.image[ 'Name' ]
