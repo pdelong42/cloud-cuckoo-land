@@ -3,6 +3,7 @@
 # This assumes that the session-manager-plugin has been installed and
 # can be found in a search through PATH.
 
+import os
 import sys
 import boto3
 
@@ -22,7 +23,7 @@ session = boto3.session.Session()
 region = session.region_name
 client = session.client( service_name = 'ssm' )
 
-response = client.start_session( Target = iid )
+response = client.start_session( Target = instanceId )
 
 nospaces = (',', ':')
 program = 'session-manager-plugin'
