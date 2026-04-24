@@ -1,3 +1,5 @@
+ - Make the instantiate module more OO;
+
  - Make a library module for spinning-DOWN a new instance.
 
  - Write a script to check for console access, and enable it if it's
@@ -28,13 +30,20 @@
 
  - Create an instance that uses Fedora.
 
- - Create an instance that uses ARM (Graviton?).  See why it balks at
-   UEFI.
-
  - Move tests into their own subfolder.
 
- - use imagebuilder(?) to create a modified AMI with a non-zero menu
-   timeout in grub;
+ - look into using imagebuilder as a way to bake-in certain post-facto
+   features to any cherry-picked AMI:
+   - set GRUB_TIMEOUT=30 in /etc/default/grub;
+   - create the "somebody" account, for console access;
+   - install the SSM agent (done implicitly by ImageBuilder);
+   - install the CloudWatch agent (using AWS-provided recipe);
+
+ - [DONE] Create an instance that uses ARM (Graviton?).  See why it
+   balks at UEFI.
+   - it didn't balk at UEFI, it just had a problem with a mismatch - I
+     changed the architecture of the image, but forgot to change the
+     instance type to match;
 
  - [DONE] Make a library module for spinning-up a new instance.
 
