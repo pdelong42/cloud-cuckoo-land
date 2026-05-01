@@ -4,13 +4,13 @@ import boto3
 
 class UniqueMachineImage:
 
-    def __init__( self, parameters ):
+    def __init__( self, owner, **parameters ):
 
         filters = []
 
         for k in parameters.keys():
             v = parameters[ k ]
-            f = { 'Name': k, 'Values': [ v ] }
+            f = { 'Name': k.replace( '_', '-' ), 'Values': [ v ] }
             filters.append( f )
 
         self.ID = ''
@@ -21,7 +21,7 @@ class UniqueMachineImage:
 
         client = boto3.session.Session().client( service_name = 'ec2' )
 
-        response = client.describe_images( Filters = filters )
+        response = client.describe_images( Filters = filters, Owners = [ owner ] )
 
         self.images = response[ 'Images' ]
         self.size = len( self.images )

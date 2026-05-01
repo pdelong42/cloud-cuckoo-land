@@ -22,30 +22,26 @@ from amiuniq import UniqueMachineImage
 # the month that you are currently in the middle of.  The same goes
 # for any time period, whether it's the year or the day).
 
-umi = UniqueMachineImage( {
-    'architecture': 'x86_64',
-    'creation-date': '2026-02-*',
-    'name': 'RHEL-*',
-    'owner-id': '309956199498'
-} )
-
 # Note about Amazon Linux: the year of release (2023, in this case),
 # is part of the name.  Don't let that confuse you; they've updated it
 # since then.
 #
-#umi = UniqueMachineImage( {
-#    'architecture': 'arm64',
-#    'creation-date': '2026-01-22T*',
-#    'name': 'al2023-ami-minimal-2023.10.*-kernel-6.12-*',
-#    'owner-id': '137112412989'
-#} )
+#umi = UniqueMachineImage( '137112412989',
+#    architecture = 'arm64',
+#    creation_date = '2026-05-01T*',
+#    name = 'al2023-ami-minimal-2023.10.*-kernel-6.12-*' )
 
-#umi = UniqueMachineImage( {
-#    'architecture': 'x86_64',
-#    'creation-date': '2026-02-*',
-#    'name': 'Fedora-Cloud-Base-AmazonEC2.x86_64-43-*',
-#    'owner-id': '125523088429'
-#} )
+#umi = UniqueMachineImage( '125523088429',
+#    architecture = 'x86_64',
+#    creation_date = '2026-04-*',
+#    name = 'Fedora-Cloud-Base-AmazonEC2.x86_64-43-*' )
+
+#umi = UniqueMachineImage( '309956199498',
+#    architecture = 'x86_64',
+#    creation_date = '2026-04-*',
+#    name = 'RHEL-*' )
+
+umi = UniqueMachineImage( 'self' )
 
 if 1 > umi.size:
     print( "ABORT: no match found" )
@@ -65,5 +61,3 @@ for i in umi.images:
     AMI = i[ 'ImageId' ]
     name = i[ 'Name' ]
     print( f'AMI = {AMI}; name = {name}' )
-
-#            'Values' : [ 'al2023-ami-2023.7.20250527.1-kernel-6.1-x86_64' ]

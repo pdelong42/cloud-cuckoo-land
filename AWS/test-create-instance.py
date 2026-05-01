@@ -33,23 +33,21 @@ NameTag = sys.argv.pop()
 #passhash = crypt( getpass( f'Choose a password to use for the user named \'{username}\': ' ) )
 #UserData = f'#!/bin/bash\n\nuseradd -g wheel -p \'{passhash}\' {username}'
 
-#UMI = UniqueMachineImage( {
-#    'architecture': 'arm64',
-#    'creation-date': '2026-01-22T*',
-#    'name': 'al2023-ami-minimal-2023.10.*-kernel-6.12-*',
-#    'owner-id': '137112412989' } )
+#UMI = UniqueMachineImage( '137112412989',
+#    architecture = 'arm64',
+#    creation_date = '2026-01-22T*',
+#    name = 'al2023-ami-minimal-2023.10.*-kernel-6.12-*' )
 #
 # When creating the instance, be sure to use an instance type that is
 # ARM64, e.g.: t4g.small
 
-#UMI = UniqueMachineImage( {
-#    'architecture': 'x86_64',
-#    'creation-date': '2026-01-*',
-#    'name': 'RHEL-10.*',
-#    'owner-id': '309956199498'
-#} )
+#UMI = UniqueMachineImage( '309956199498',
+#    architecture = 'x86_64',
+#    creation_date = '2026-01-*',
+#    name = 'RHEL-10.*' )
 
-UMI = UniqueMachineImage( { 'owner-id': '931886963281' } )
+#UMI = UniqueMachineImage( '931886963281' )
+UMI = UniqueMachineImage( 'self' )
 
 # ImageId is required
 #
