@@ -25,7 +25,7 @@ def modeset( fileId ):
 
 def from_remote_to_local( remote ):
 
-    chars = remote.recv( 1024 ).decode()
+    chars = remote.recv( 1024 ).decode( 'utf-8', errors = 'ignore' )
 
     if len( chars ) > 0:
         sys.stdout.write( chars )
