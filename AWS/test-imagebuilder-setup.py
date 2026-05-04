@@ -21,18 +21,26 @@ if 1 > umi.size:
     sys.exit( 1 )
 
 if 0 < umi.size:
-    print( f'found {umi.ID}' )
+    print( f'FOUND: {umi.ID}' )
 
 client = boto3.session.Session().client( service_name = 'imagebuilder' )
 
 response = client.create_image_recipe(
+    additionalInstanceConfiguration = { 'systemsManagerAgent': { 'uninstallAfterBuild': False } },
+    components = [
+        { 'componentArn': 'arn:aws:imagebuilder:us-east-1:aws:component/amazon-cloudwatch-agent-linux/1.0.1' } ],
     name = 'test',
     parentImage = umi.ID,
-    semanticVersion = '2026.05.01' )
+    semanticVersion = '2026.05.03' )
+
+#response = client.create_image_recipe(
+#    name = 'test',
+#    parentImage = umi.ID,
+#    semanticVersion = '2026.05.03' )
 
 ira = response[ 'imageRecipeArn' ]
 
-print( ira )
+print( f'CREATED: {ira}' )
 
 response = client.create_infrastructure_configuration(
     instanceProfileName = 'Baseline',
@@ -40,7 +48,7 @@ response = client.create_infrastructure_configuration(
 
 ica = response[ 'infrastructureConfigurationArn' ]
 
-print( ica )
+print( f'CREATED: {ica}' )
 
 #response = client.create_image_pipeline(
 #    imageRecipeArn = ira,
@@ -59,7 +67,7 @@ response = client.create_image(
 
 ibva = response[ 'imageBuildVersionArn' ]
 
-print( ibva )
+print( f'CREATED: {ibva}' )
 
 # Instead of creating a pipeline, we can use create_image(), but then
 # it creates an ad-hoc pipeline.

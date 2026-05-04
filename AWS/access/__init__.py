@@ -58,6 +58,7 @@ class InstanceProfileRole:
         ARNs = list( policies )
         ARNs.append( 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore' )
         ARNs.append( 'arn:aws:iam::aws:policy/AmazonSSMPatchAssociation' )
+        ARNs.append( 'arn:aws:iam::aws:policy/AWSImageBuilderReadOnlyAccess' )
         ARNs.append( 'arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy' )
 
         for ARN in ARNs:

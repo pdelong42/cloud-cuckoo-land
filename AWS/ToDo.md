@@ -39,6 +39,31 @@
    - install the SSM agent (done implicitly by ImageBuilder);
    - install the CloudWatch agent (using AWS-provided recipe);
 
+ - look into the following components:
+
+  {
+    "arn": "arn:aws:imagebuilder:us-east-1:aws:component/install-package-from-repository/1.0.0",
+    "dateCreated": "2024-04-01T21:32:44.238Z",
+    "description": "Installs a package from the Linux repository.",
+    "name": "install-package-from-repository",
+    "owner": "Amazon",
+    "platform": "Linux",
+    "status": "ACTIVE",
+    "type": "BUILD",
+    "version": "1.0.0"
+  },
+  {
+    "arn": "arn:aws:imagebuilder:us-east-1:aws:component/update-linux/1.0.2",
+    "dateCreated": "2021-09-28T18:01:20.806Z",
+    "description": "Updates Linux by installing all available updates via the UpdateOS action module.",
+    "name": "update-linux",
+    "owner": "Amazon",
+    "platform": "Linux",
+    "status": "ACTIVE",
+    "type": "BUILD",
+    "version": "1.0.2"
+  },
+
  - [DONE] Create an instance that uses ARM (Graviton?).  See why it
    balks at UEFI.
    - it didn't balk at UEFI, it just had a problem with a mismatch - I
@@ -46,6 +71,12 @@
      instance type to match;
 
  - [DONE] Make a library module for spinning-up a new instance.
+
+ - [DONE] add the imagebuilder:GetComponent action (or a policy
+   containing it) to the Baseline role;
+
+ - [DONE] Write more logic for the lifecycle of ImageBuilder,
+   including deregistering AMIs when we need to.
 
  - [DONE] Create some basic roles and instance-profiles which have a
    minimum set of policies to allow contact with SSM and CloudWatch.
