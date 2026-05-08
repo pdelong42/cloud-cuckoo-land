@@ -25,18 +25,42 @@ if 0 < umi.size:
 
 client = boto3.session.Session().client( service_name = 'imagebuilder' )
 
+yaml = '''
+name: kernel-tweaking
+description: This is where I make tweaks to the boot parameters
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: AlterGrubConfig
+        action: ExecuteBash
+        inputs:
+          commands:
+            - |
+              sed -i '1iserial --speed=115200' /boot/grub2/grub.cfg
+              sed -i '1iterminal_input --append serial; terminal_output --append serial' /boot/grub2/grub.cfg
+              sed -i '/^set timeout=/s/0/10/' /boot/grub2/grub.cfg
+              cat /boot/grub2/grub.cfg
+'''
+
+response = client.create_component(
+    data = yaml,
+    name = 'kernel-tweaking',
+    platform = 'Linux',
+    semanticVersion = '1.0.0' )
+
+cbva = response[ 'componentBuildVersionArn' ]
+
+print( f'CREATED: {cbva}' )
+
 response = client.create_image_recipe(
     additionalInstanceConfiguration = { 'systemsManagerAgent': { 'uninstallAfterBuild': False } },
     components = [
+        { 'componentArn': cbva },
         { 'componentArn': 'arn:aws:imagebuilder:us-east-1:aws:component/amazon-cloudwatch-agent-linux/1.0.1' } ],
     name = 'test',
     parentImage = umi.ID,
-    semanticVersion = '2026.05.03' )
-
-#response = client.create_image_recipe(
-#    name = 'test',
-#    parentImage = umi.ID,
-#    semanticVersion = '2026.05.03' )
+    semanticVersion = '2026.05.06' )
 
 ira = response[ 'imageRecipeArn' ]
 

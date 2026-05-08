@@ -58,3 +58,19 @@ for i in response[ 'imageRecipeSummaryList' ]:
     response = client.delete_image_recipe( imageRecipeArn = arn )
 
     print( f'DELETED: {arn}' )
+
+response = client.list_components()
+
+for i in response[ 'componentVersionList' ]:
+
+    arn = i[ 'arn' ]
+    response = client.list_component_build_versions( componentVersionArn = arn )
+
+    print( f'FOUND: {arn}' )
+
+    for i in response[ 'componentSummaryList' ]:
+
+        arn = i[ 'arn' ]
+        response = client.delete_component( componentBuildVersionArn = arn )
+
+        print( f'DELETED: {arn}' )

@@ -57,7 +57,16 @@ uno = CreateSingleton(
     ImageId = UMI.ID,
     InstanceType = 't3.small' )
 
+# I really ought to bake IamInstanceProfile into the image, using
+# ImageBuilder.  TBD.
+
+# This is a good Graviton (ARM) instance type to play with:
+#
 #    InstanceType = 't4g.small'
+
+# This makes for a good fallback option, in case SSM doesn't work, and
+# I also didn't have the foresight to create a local login account:
+#
 #    KeyName = 'framework-laptop'
 
 print( f'Created instance {uno.ID}' )
