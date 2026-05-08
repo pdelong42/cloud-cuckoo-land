@@ -86,6 +86,7 @@ class ConsoleToInstance:
 
         while True:
             try:
+                time.sleep( 1 )
                 # abstract this into a function?
                 response = client.send_serial_console_ssh_public_key(
                     InstanceId = instanceId,
@@ -128,6 +129,7 @@ class ConsoleToInstance:
         # we'll catch specific exceptions as we stumble across them...
         while True:
             try:
+                time.sleep( 1 )
                 client.connect( hostname = endpoint, username = userId, pkey = private_key )
                 break
             # this will often be raised erroneously, masking a more fundamental issue:
