@@ -1,6 +1,10 @@
- - Make the instantiate module more OO;
+ - add start and stop to the Singleton class;
 
- - Make a library module for spinning-DOWN a new instance.
+ - make the kernel-tweaking component in ImageBuilder also modify
+   /etc/default/grub to set the timeout to 10s there too;
+
+ - Make a library module for spinning-DOWN a new instance.  Update: I
+   don't know what I was talking about here.
 
  - Write a script to check for console access, and enable it if it's
    not already:
@@ -21,7 +25,9 @@
    followed by a dot.
 
  - It looks like the console logic can't handle UTF-8.  Fix that.  It
-   breaks when I run `lsblk` in the console of the instance.
+   breaks when I run `lsblk` in the console of the instance.  Update:
+   fixed with a band-aid, but I haven't decided if this is good enough
+   to call done yet.
 
  - Create separate test cases for Amazon Linux and for RHEL (and maybe
    Fedora too).
@@ -63,6 +69,8 @@
     "type": "BUILD",
     "version": "1.0.2"
   },
+
+ - [DONE] Make the instantiate module more OO;
 
  - [DONE] Create an instance that uses ARM (Graviton?).  See why it
    balks at UEFI.

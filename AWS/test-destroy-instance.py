@@ -1,22 +1,22 @@
 #!/usr/bin/python
 
 import sys
-import boto3
+import time
 
 from threading import Thread
+from instantiate import Singleton
 from console import ConsoleToInstance
-from instantiate import DestroySingleton
 
 if 2 != len( sys.argv ):
     print( "ERROR: please provide a Name tag as the first (and only) arg" )
     sys.exit()
 
 NameTag = sys.argv.pop()
-
-uno = DestroySingleton( NameTag )
-
-print( f'Destroyed instance {uno.ID}' )
-
+uno = Singleton( NameTag )
 console_thread = Thread( target = ConsoleToInstance, args = [ uno.ID ] )
 
 console_thread.start()
+time.sleep( 3 )
+uno.destroy()
+
+print( f'Destroyed instance {uno.ID}' )

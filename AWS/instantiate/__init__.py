@@ -4,14 +4,27 @@ import boto3
 
 from tagtable import Instances
 
-class CreateSingleton:
+class Singleton:
 
-    def __init__( self, nametag, **parameters ):
+    def __init__( self, NameTag ):
+
+        instanceTable = Instances()
 
         self.ID = ''
         self.size = 0
+        self.nametag = NameTag
         self.instance = {}
         self.instances = []
+        self.client = boto3.session.Session().client( service_name = 'ec2' )
+
+        if NameTag in instanceTable.IDs:
+            self.ID = instanceTable.IDs[ NameTag ]
+
+    def create( self, **parameters ):
+
+        if self.ID:
+            print( f'ERROR: instance with Name tag {self.nametag} already exists, aborting' )
+            return
 
         # MaxCount and MinCount are both required, and I need to
         # specify them anyway, since this object is meant to only
@@ -26,10 +39,9 @@ class CreateSingleton:
                 {   'ResourceType': 'instance',
                     'Tags': [
                         {   'Key': 'Name',
-                            'Value': nametag } ] } ] } )
+                            'Value': self.nametag } ] } ] } )
 
-        client = boto3.session.Session().client( service_name = 'ec2' )
-        response = client.run_instances( **parameters )
+        response = self.client.run_instances( **parameters )
 
         self.instances = response[ 'Instances' ]
         self.size      = len( self.instances )
@@ -44,21 +56,9 @@ class CreateSingleton:
         self.instance = self.instances.pop()
         self.ID       = self.instance[ 'InstanceId' ]
 
-class DestroySingleton:
+    def destroy( self ):
 
-    def __init__( self, NameTag ):
-
-        self.ID = ''
-        self.size = 0
-        self.instance = {}
-        self.instances = []
-
-        instanceTable = Instances()
-        instanceId = instanceTable.IDs[ NameTag ]
-
-        client = boto3.session.Session().client( service_name = 'ec2' )
-
-        response = client.terminate_instances( InstanceIds = [ instanceId ] )
+        response = self.client.terminate_instances( InstanceIds = [ self.ID ] )
 
         self.instances = response[ 'TerminatingInstances' ]
         self.size      = len( self.instances )
@@ -81,7 +81,7 @@ class DestroySingleton:
 
             print( f'\nTransitioning instance {iid} from {prev} to {curr}' )
 
-        response = client.delete_tags( Resources = [ instanceId ] )
+        response = self.client.delete_tags( Resources = [ self.ID ] )
 
 # other parameters to consider passing...
 #    SubnetId='',

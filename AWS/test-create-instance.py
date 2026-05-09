@@ -8,7 +8,7 @@ from getpass import getpass
 from threading import Thread
 from console import ConsoleToInstance
 from amiuniq import UniqueMachineImage
-from instantiate import CreateSingleton
+from instantiate import Singleton
 
 if 2 != len( sys.argv ):
     print( "ERROR: please provide a Name tag as the first (and only) arg" )
@@ -51,9 +51,10 @@ UMI = UniqueMachineImage( 'self' )
 
 # ImageId is required
 #
-uno = CreateSingleton(
-    NameTag,
-    IamInstanceProfile = {'Name':'Baseline'},
+uno = Singleton( NameTag );
+
+uno.create(
+    IamInstanceProfile = { 'Name' : 'Baseline' },
     ImageId = UMI.ID,
     InstanceType = 't3.small' )
 
