@@ -1,10 +1,11 @@
- - add start and stop to the Singleton class;
-
  - make the kernel-tweaking component in ImageBuilder also modify
    /etc/default/grub to set the timeout to 10s there too;
 
- - Make a library module for spinning-DOWN a new instance.  Update: I
-   don't know what I was talking about here.
+ - Implement these in Python:
+
+   aws ec2 describe-instances --output text --query 'Reservations[].Instances[].State.Name'
+
+   aws ec2 describe-instances --output text --query 'Reservations[].Instances[].InstanceId' > id-instance.txt
 
  - Write a script to check for console access, and enable it if it's
    not already:
@@ -69,6 +70,25 @@
     "type": "BUILD",
     "version": "1.0.2"
   },
+
+
+ - The test scripts rely on the fact that the modules are in the
+   current directory.  I don't know if that's what Python considers a
+   "best pracice", but it feels gross to me.  But I'm going to do that
+   until I find a better way to do library path management in this
+   runtime.  Until then, I'll leave this note here.  Alternatively:
+
+   ```
+   import os
+   component = os.path.dirname( sys.argv[0] )
+   sys.path.append( f'./{component}/lib/cloud-cuckoo-land/AWS' )
+   ```
+
+ - [DONE] Make a library module for spinning-DOWN a new instance.
+   Update: I don't know what I was talking about here, it already
+   looks like I did it.
+
+ - [DONE] add start and stop to the Singleton class;
 
  - [DONE] Make the instantiate module more OO;
 

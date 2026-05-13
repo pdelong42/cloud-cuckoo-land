@@ -14,8 +14,6 @@ if 2 != len( sys.argv ):
     print( "ERROR: please provide a Name tag as the first (and only) arg" )
     sys.exit()
 
-NameTag = sys.argv.pop()
-
 # This is only necessary if you need to log-in on the console, which
 # is in-turn only necessary if you can't get in via either SSM or SSH.
 # SSH is unavailable if you haven't set-up any SGRs to allow for that
@@ -47,19 +45,24 @@ NameTag = sys.argv.pop()
 #    name = 'RHEL-10.*' )
 
 #UMI = UniqueMachineImage( '931886963281' )
+
+NameTag = sys.argv.pop()
+uno = Singleton( NameTag );
 UMI = UniqueMachineImage( 'self' )
 
-# ImageId is required
+# ImageId is required.
 #
-uno = Singleton( NameTag );
-
+# I really ought to bake IamInstanceProfile into the image, using
+# ImageBuilder.  TBD.
+#
 uno.create(
     IamInstanceProfile = { 'Name' : 'Baseline' },
     ImageId = UMI.ID,
     InstanceType = 't3.small' )
 
-# I really ought to bake IamInstanceProfile into the image, using
-# ImageBuilder.  TBD.
+console_thread = Thread( target = ConsoleToInstance, args = [ uno.ID ] )
+
+console_thread.start()
 
 # This is a good Graviton (ARM) instance type to play with:
 #
@@ -70,8 +73,7 @@ uno.create(
 #
 #    KeyName = 'framework-laptop'
 
-print( f'Created instance {uno.ID}' )
-
-console_thread = Thread( target = ConsoleToInstance, args = [ uno.ID ] )
-
-console_thread.start()
+# other parameters to consider passing...
+#    SubnetId='',
+#    InstanceType='t3.large',
+#    MetadataOptions='HttpTokens=required,InstanceMetadataTags=enabled'

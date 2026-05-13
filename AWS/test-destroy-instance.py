@@ -16,7 +16,5 @@ uno = Singleton( NameTag )
 console_thread = Thread( target = ConsoleToInstance, args = [ uno.ID ] )
 
 console_thread.start()
-time.sleep( 3 )
+time.sleep( 10 )
 uno.destroy()
-
-print( f'Destroyed instance {uno.ID}' )

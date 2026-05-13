@@ -4,6 +4,14 @@ import boto3
 
 from tagtable import Instances
 
+def TransitionNotice( x ):
+
+    iid = x[ 'InstanceId' ]
+    prev = x[ 'PreviousState' ][ 'Name' ]
+    curr = x[  'CurrentState' ][ 'Name' ]
+
+    print( f'\nTransitioning instance {iid} from {prev} to {curr}' )
+
 class Singleton:
 
     def __init__( self, NameTag ):
@@ -56,6 +64,8 @@ class Singleton:
         self.instance = self.instances.pop()
         self.ID       = self.instance[ 'InstanceId' ]
 
+        print( f'Created instance {self.ID}' )
+
     def destroy( self ):
 
         response = self.client.terminate_instances( InstanceIds = [ self.ID ] )
@@ -73,17 +83,44 @@ class Singleton:
         self.instance = self.instances.pop()
         self.ID       = self.instance[ 'InstanceId' ]
 
-        for x in response[ 'TerminatingInstances' ]:
-
-            iid = x[ 'InstanceId' ]
-            prev = x[ 'PreviousState' ][ 'Name' ]
-            curr = x[  'CurrentState' ][ 'Name' ]
-
-            print( f'\nTransitioning instance {iid} from {prev} to {curr}' )
+        TransitionNotice( self.instance )
 
         response = self.client.delete_tags( Resources = [ self.ID ] )
 
-# other parameters to consider passing...
-#    SubnetId='',
-#    InstanceType='t3.large',
-#    MetadataOptions='HttpTokens=required,InstanceMetadataTags=enabled'
+    def start( self ):
+
+        response = self.client.start_instances( InstanceIds = [ self.ID ] )
+
+        self.instances = response[ 'StartingInstances' ]
+        self.size      = len( self.instances )
+
+        if self.size < 1:
+            print( 'ERROR: no instances were successfully started' )
+            return
+
+        if self.size > 1:
+            print( f'WARNING: too many instances ({self.size}) were started - only returning first one' )
+
+        self.instance = self.instances.pop()
+        self.ID       = self.instance[ 'InstanceId' ]
+
+        TransitionNotice( self.instance )
+
+    def stop( self ):
+
+        response = self.client.stop_instances( InstanceIds = [ self.ID ] )
+
+        self.instances = response[ 'StoppingInstances' ]
+        self.size      = len( self.instances )
+
+        if self.size < 1:
+            print( 'ERROR: no instances were successfully stopped' )
+            return
+
+        if self.size > 1:
+            print( f'WARNING: too many instances ({self.size}) were stopped - only returning first one' )
+
+        self.instance = self.instances.pop()
+        self.ID       = self.instance[ 'InstanceId' ]
+
+        TransitionNotice( self.instance )
