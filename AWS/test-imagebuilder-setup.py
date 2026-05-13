@@ -3,13 +3,26 @@
 import sys
 import boto3
 
-from json import dumps
 from amiuniq import UniqueMachineImage
 
-#umi = UniqueMachineImage( '125523088429',
-#    architecture = 'x86_64',
-#    creation_date = '2026-04-*',
-#    name = 'Fedora-Cloud-Base-AmazonEC2.x86_64-43-*' )
+# This is only necessary if you need to log-in on the console, which
+# is in-turn only necessary if you can't get in via either SSM or SSH.
+# SSH is unavailable if you haven't set-up any SGRs to allow for that
+# access; and SSM is unavailable if you aren't using an AMI where the
+# agent is already baked-in (such as Amazon Linux), and you haven't
+# baked it in using ImageBuilder.
+#
+# But in those situations, it's still useful, so it might be a good
+# idea to bake it in via a Component for ImageBuilder (if you're okay
+# with your password hash being stored in AWS infrastructure).
+# Another approach is to do it via SSM, after the instance has been
+# instantiated.  But one approach I would not reccommend is doing it
+# via UserData, because will override the installation of SSM.
+#
+#from crypt import crypt
+#username = 'somebody'
+#passhash = crypt( getpass( f'Choose a password to use for the user named \'{username}\': ' ) )
+#UserData = f'#!/bin/bash\n\nuseradd -g wheel -p \'{passhash}\' {username}'
 
 umi = UniqueMachineImage( '309956199498',
     architecture = 'x86_64',

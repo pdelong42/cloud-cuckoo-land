@@ -13,7 +13,7 @@ import sys
 from json import dumps
 from amiuniq import UniqueMachineImage
 
-# The idea here is to specify enough fitler tokens that only one
+# The idea here is to specify enough filter tokens that only one
 # result is returned.  Zero matches is considered a fatal error, and
 # more than one match is met with a non-fatal warning.
 #
@@ -28,8 +28,11 @@ from amiuniq import UniqueMachineImage
 #
 #umi = UniqueMachineImage( '137112412989',
 #    architecture = 'arm64',
-#    creation_date = '2026-05-01T*',
+#    creation_date = '2026-05-22T*',
 #    name = 'al2023-ami-minimal-2023.10.*-kernel-6.12-*' )
+#
+# When creating the instance, be sure to use an instance type that is
+# ARM64, e.g.: t4g.small
 
 #umi = UniqueMachineImage( '125523088429',
 #    architecture = 'x86_64',
@@ -40,6 +43,11 @@ from amiuniq import UniqueMachineImage
 #    architecture = 'x86_64',
 #    creation_date = '2026-04-*',
 #    name = 'RHEL-*' )
+
+#umi = UniqueMachineImage( '309956199498',
+#    architecture = 'x86_64',
+#    creation_date = '2026-04-*',
+#    name = 'RHEL-10.*' )
 
 umi = UniqueMachineImage( 'self' )
 
