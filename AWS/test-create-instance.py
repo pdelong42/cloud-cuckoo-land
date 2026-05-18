@@ -38,6 +38,8 @@ console_thread.start()
 # This is a good Graviton (ARM) instance type to play with:
 #
 #    InstanceType = 't4g.small'
+#
+# Default seems to be m1.small, which causes a kernel panic...
 
 # This makes for a good fallback option, in case SSM doesn't work, and
 # I also didn't have the foresight to create a local login account:

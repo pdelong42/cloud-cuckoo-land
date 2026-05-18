@@ -25,11 +25,13 @@ from amiuniq import UniqueMachineImage
 # Note about Amazon Linux: the year of release (2023, in this case),
 # is part of the name.  Don't let that confuse you; they've updated it
 # since then.
+
+# owner ID: 137112412989 (a.k.a, Amazon)
 #
-#umi = UniqueMachineImage( '137112412989',
+#umi = UniqueMachineImage( 'amazon',
 #    architecture = 'arm64',
-#    creation_date = '2026-05-22T*',
-#    name = 'al2023-ami-minimal-2023.10.*-kernel-6.12-*' )
+#    creation_date = '2026-04-29*',
+#    name = 'al2023-ami-minimal-2023.11.*-kernel-6.18-*' )
 #
 # When creating the instance, be sure to use an instance type that is
 # ARM64, e.g.: t4g.small
