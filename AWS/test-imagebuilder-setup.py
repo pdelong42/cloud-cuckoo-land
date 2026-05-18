@@ -53,12 +53,12 @@ phases:
               sed -i '1iserial --speed=115200' /boot/grub2/grub.cfg
               sed -i '1iterminal_input --append serial; terminal_output --append serial' /boot/grub2/grub.cfg
               sed -i '/^set timeout=/s/0/10/' /boot/grub2/grub.cfg
-              cat /boot/grub2/grub.cfg
+              sed -i '/^GRUB_TIMEOUT=/s/0/10/' /etc/default/grub
 '''
 
 response = client.create_component(
     data = yaml,
-    name = 'kernel-tweaking',
+    name = 'bootloader-config-tweak',
     platform = 'Linux',
     semanticVersion = '1.0.0' )
 
@@ -67,13 +67,16 @@ cbva = response[ 'componentBuildVersionArn' ]
 print( f'CREATED: {cbva}' )
 
 response = client.create_image_recipe(
-    additionalInstanceConfiguration = { 'systemsManagerAgent': { 'uninstallAfterBuild': False } },
+    additionalInstanceConfiguration = {
+        'systemsManagerAgent': {
+            'uninstallAfterBuild': False } },
     components = [
         { 'componentArn': cbva },
-        { 'componentArn': 'arn:aws:imagebuilder:us-east-1:aws:component/amazon-cloudwatch-agent-linux/1.0.1' } ],
+        { 'componentArn':
+          'arn:aws:imagebuilder:us-east-1:aws:component/amazon-cloudwatch-agent-linux/1.0.1' } ],
     name = 'test',
     parentImage = umi.ID,
-    semanticVersion = '2026.05.06' )
+    semanticVersion = '2026.05.18' )
 
 ira = response[ 'imageRecipeArn' ]
 
