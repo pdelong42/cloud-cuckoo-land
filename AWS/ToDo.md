@@ -1,6 +1,3 @@
- - make the kernel-tweaking component in ImageBuilder also modify
-   /etc/default/grub to set the timeout to 10s there too;
-
  - Implement these in Python:
 
    aws ec2 describe-instances --output text --query 'Reservations[].Instances[].State.Name'
@@ -35,16 +32,7 @@
 
  - Create an instance and a VPC that only use IPv6.
 
- - Create an instance that uses Fedora.
-
  - Move tests into their own subfolder.
-
- - look into using imagebuilder as a way to bake-in certain post-facto
-   features to any cherry-picked AMI:
-   - set GRUB_TIMEOUT=30 in /etc/default/grub;
-   - create the "somebody" account, for console access;
-   - install the SSM agent (done implicitly by ImageBuilder);
-   - install the CloudWatch agent (using AWS-provided recipe);
 
  - look into the following components:
 
@@ -83,6 +71,18 @@
    component = os.path.dirname( sys.argv[0] )
    sys.path.append( f'./{component}/lib/cloud-cuckoo-land/AWS' )
    ```
+
+ - [DONE] Create an instance that uses Fedora.
+
+ - [DONE] look into using imagebuilder as a way to bake-in certain
+   post-facto features to any cherry-picked AMI:
+   - [DONE] set GRUB_TIMEOUT=30 in /etc/default/grub;
+   - [DONE] install the SSM agent (done implicitly by ImageBuilder);
+   - [DONE] install the CloudWatch agent (using AWS-provided recipe);
+   - [NOPE] create the "somebody" account, for console access;
+
+ - [DONE] make the kernel-tweaking component in ImageBuilder also
+   modify /etc/default/grub to set the timeout to 10s there too;
 
  - [DONE] Make a library module for spinning-DOWN a new instance.
    Update: I don't know what I was talking about here, it already

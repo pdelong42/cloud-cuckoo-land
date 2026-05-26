@@ -2,7 +2,6 @@
 
 import sys
 
-from getpass import getpass
 from threading import Thread
 from console import ConsoleToInstance
 from amiuniq import UniqueMachineImage

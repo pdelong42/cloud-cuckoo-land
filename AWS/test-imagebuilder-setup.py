@@ -19,6 +19,7 @@ from amiuniq import UniqueMachineImage
 # instantiated.  But one approach I would not reccommend is doing it
 # via UserData, because will override the installation of SSM.
 #
+#from getpass import getpass
 #from crypt import crypt
 #username = 'somebody'
 #passhash = crypt( getpass( f'Choose a password to use for the user named \'{username}\': ' ) )
@@ -39,7 +40,7 @@ if 0 < umi.size:
 client = boto3.session.Session().client( service_name = 'imagebuilder' )
 
 yaml = '''
-name: kernel-tweaking
+name: bootloader-config-tweak
 description: This is where I make tweaks to the boot parameters
 schemaVersion: 1.0
 phases:
