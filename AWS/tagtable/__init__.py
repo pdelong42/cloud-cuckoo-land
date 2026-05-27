@@ -1,15 +1,8 @@
 #!/usr/bin/python
 
-import sys
-
 from boto3 import Session
 
 class VPCs:
-
-    # ...where our hero actually decides to use some OO design
-    # principles...  like, just barely (compare and contrast with the
-    # console implementation, which is basically just an imperative
-    # wolf in grandma-OO's clothing).
 
     def __init__( self ):
 
@@ -28,6 +21,26 @@ class VPCs:
 
             self.names[ i[ 'VpcId' ] ] = tags[ 'Name' ]
             self.IDs[ tags[ 'Name' ] ] = i[ 'VpcId' ]
+
+class Subnets:
+
+    def __init__( self ):
+
+        self.IDs   = {}
+        self.names = {}
+
+        client = Session().client( service_name = 'ec2' )
+        response = client.describe_subnets()
+        vpcs = response[ 'Subnets' ]
+
+        for i in vpcs:
+
+            if not 'Tags' in i: continue
+
+            tags = { t[ 'Key' ]: t[ 'Value' ] for t in i[ 'Tags' ] }
+
+            self.names[ i[ 'SubnetId' ] ] = tags[ 'Name' ]
+            self.IDs[ tags[ 'Name' ] ] = i[ 'SubnetId' ]
 
 class Instances:
 
