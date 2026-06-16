@@ -7,7 +7,6 @@ import docker
 import tarfile
 
 dockerfile = ''
-dockerpath = './Dockerfile'
 
 dockercfg = '''
 FROM public.ecr.aws/amazonlinux/amazonlinux:latest
