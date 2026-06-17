@@ -1,3 +1,11 @@
+ - create buckets in S3
+
+ - create trails in CloudTrail
+
+ - configure Google as SSO IdP
+   - [DONE] upload SAML metadata
+   - assign role
+
  - Implement these in Python:
 
    aws ec2 describe-instances --output text --query 'Reservations[].Instances[].State.Name'

@@ -51,6 +51,9 @@ from amiuniq import UniqueMachineImage
 #    creation_date = '2026-04-*',
 #    name = 'RHEL-10.*' )
 
+# other useful owner IDs:
+# 782442783595 - FreeBSD
+
 umi = UniqueMachineImage( 'self' )
 
 if 1 > umi.size:
