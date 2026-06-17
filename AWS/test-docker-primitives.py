@@ -55,9 +55,11 @@ for log in logs:
 response = cetacean.create_repository( repositoryName = reponame )
 url_sans_scheme = response[ 'repository' ][ 'repositoryUri' ]
 
+# we don't explicitly specify the tag here, but it is implicitly "latest" [1]
 if not image.tag( repository = url_sans_scheme ):
     print( "ERROR: unsuccessful attempt to tag" )
     sys.exit( 1 )
+    # it never really reaches here anyway, due to an exception being raised upon failure
 
 token = ''
 url = urlparse( f'https://{url_sans_scheme}' )
@@ -89,3 +91,14 @@ print( logs, file = sys.stderr )
 #aws ecr describe-repositories
 #aws ecr delete-repository --repository-name hello-repository
 #aws ecr delete-repository --repository-name hello-repository --force
+
+# Footnote 1:
+#
+# This is somewhat misleading in the ways it's done.  For instance,
+# the equivalent in the CLI would be this:
+#
+#    docker tag hello-world aws_account_id.dkr.ecr.region.amazonaws.com/hello-repository
+#
+# And again, this is misleading, because the tag itself appears nowhere in there.
+#
+# (cf. https://docs.aws.amazon.com/AmazonECS/latest/developerguide/create-container-image.html)
