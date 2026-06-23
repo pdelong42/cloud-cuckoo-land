@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+# ToDo:
+# - research using aiodocker:
+#   https://aiodocker.readthedocs.io/en/latest/images.html
+
 import io
 import os
 import sys

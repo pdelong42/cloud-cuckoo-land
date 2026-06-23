@@ -28,27 +28,27 @@ print( f'Created {clusterArn}' )
 taskdef = {
     "containerDefinitions": [
         {
-            "name": "fargate-app", 
+            "command": [
+                "/bin/sh -c \"echo '<html><head><title>*TAP-TAP*</title></head><body><h1>Testing 1...2...3</h1></body></html>' > /usr/local/apache2/htdocs/index.html && httpd-foreground\""
+            ],
+            "entryPoint": [
+                "sh",
+		"-c"
+            ],
+            "essential": True,
             "image": "public.ecr.aws/docker/library/httpd:latest", 
+            "name": "minimal-apache-httpd",
             "portMappings": [
                 {
                     "containerPort": 80, 
                     "hostPort": 80, 
                     "protocol": "tcp"
                 }
-            ], 
-            "essential": True, 
-            "entryPoint": [
-                "sh",
-		"-c"
-            ], 
-            "command": [
-                "/bin/sh -c \"echo '<html><head><title>*TAP-TAP*</title></head><body><h1>Testing 1...2...3</h1></body></html>' > /usr/local/apache2/htdocs/index.html && httpd-foreground\""
             ]
         }
     ], 
     "cpu": "256", 
-    "family": "sample-fargate", 
+    "family": "sample-fargate-httpd-container",
     "memory": "512",
     "networkMode": "awsvpc", 
     "requiresCompatibilities": [
@@ -75,9 +75,12 @@ response = cetacean.create_service(
     serviceName = 'basic-service',
     taskDefinition = taskDefinitionArn )
 
-serviceArn = response[ 'service' ][ 'serviceArn' ]
+service = response[ 'service' ]
+serviceArn = service[ 'serviceArn' ]
 
 print( f'Created {serviceArn}' )
+
+print( dumps( service ), file = sys.stderr )
 
 # Footnote 1:
 #
