@@ -80,7 +80,7 @@ serviceArn = service[ 'serviceArn' ]
 
 print( f'Created {serviceArn}' )
 
-print( dumps( service ), file = sys.stderr )
+print( dumps( service, default = str ), file = sys.stderr )
 
 # Footnote 1:
 #
