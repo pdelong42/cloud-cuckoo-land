@@ -2,6 +2,26 @@
 
 from boto3 import Session
 
+class Volumes:
+
+    def __init__( self ):
+
+        self.IDs   = {}
+        self.names = {}
+
+        client = Session().client( service_name = 'ec2' )
+        response = client.describe_volumes()
+        volumes = response[ 'Volumes' ]
+
+        for i in volumes:
+
+            if not 'Tags' in i: continue
+
+            tags = { t[ 'Key' ]: t[ 'Value' ] for t in i[ 'Tags' ] }
+
+            self.names[ i[ 'VolumeId' ] ] = tags[ 'Name' ]
+            self.IDs[ tags[ 'Name' ] ] = i[ 'VolumeId' ]
+
 class VPCs:
 
     def __init__( self ):

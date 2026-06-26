@@ -1,27 +1,21 @@
 #!/usr/bin/python
 
 import sys
-import boto3
 
-from tagtable import Instances
+from boto3 import Session
+from tagtable import Instances, Volumes
 
-filters = []
 instanceTable = Instances()
 allInstanceIDs = instanceTable.IDs
 allInstanceNames = instanceTable.names
-instanceIDs = [ allInstanceIDs[ NameTag ] for NameTag in sys.argv if NameTag in allInstanceIDs ]
 
-# this and the logic that uses it is anticipating the
-# yet-to-be-written Volume class in the tagtable module
-#
-allVolumeNames = {}
+volumeTable = Volumes()
+allVolumeIDs = volumeTable.IDs
+allVolumeNames = volumeTable.names
 
-cetacean = boto3.session.Session().client( service_name = 'ec2' )
+cetacean = Session().client( service_name = 'ec2' )
 
-if instanceIDs:
-    filters = [ { 'Name': 'attachment.instance-id', 'Values': instanceIDs } ]
-
-response = cetacean.describe_volumes( Filters = filters )
+response = cetacean.describe_volumes()
 
 for volume in response[ 'Volumes' ]:
 
@@ -31,18 +25,29 @@ for volume in response[ 'Volumes' ]:
 
     if volId in allVolumeNames:
         NameTag = allVolumeNames[ volId ]
-        volId += f' NameTag = {NameTag};'
+        volId += f' (NameTag = {NameTag})'
 
-    print( f'ID = {volId}; size = {size} GiB; type = {volType};' )
+    print( f'volumeId = {volId}; size = {size} GiB; type = {volType};' )
 
     for attachment in volume[ 'Attachments' ]:
 
-        device = attachment[ 'Device' ]
+        device = attachment[ 'Device' ] # footnote 1 #
         instanceId = attachment[ 'InstanceId' ]
         delOnTerm = attachment[ 'DeleteOnTermination' ]
 
         if instanceId in allInstanceNames:
             NameTag = allInstanceNames[ instanceId ]
-            instanceId += f' NameTag = {NameTag};'
+            instanceId += f' (NameTag = {NameTag})'
 
         print( f'\tinstanceId = {instanceId}; device = {device}; delete on termination = {delOnTerm};' )
+
+# Footnote 1:
+#
+# I'm honestly not sure why I bother printing this field, as it hardly
+# serves any useful purpose.  It corresponds to what AWS thinks the
+# guest OS calls the block device, but the actual naming scheme used
+# in the OS is not the same (for either Amazon Linux or for RHEL).  I
+# suppose it has marginal value as some sort of relative positional
+# indicator, so I'm hesitant to compleletly drop it.  But I will drop
+# it if I decide that value isn't outweighed by how misleading this
+# is.
