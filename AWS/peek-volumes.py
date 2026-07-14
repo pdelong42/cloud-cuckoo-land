@@ -19,8 +19,8 @@ response = cetacean.describe_volumes()
 
 for volume in response[ 'Volumes' ]:
 
-    volId = volume[ 'VolumeId' ]
     size = volume[ 'Size' ]
+    volId = volume[ 'VolumeId' ]
     volType = volume[ 'VolumeType' ]
 
     if volId in allVolumeNames:
@@ -32,8 +32,8 @@ for volume in response[ 'Volumes' ]:
     for attachment in volume[ 'Attachments' ]:
 
         device = attachment[ 'Device' ] # footnote 1 #
-        instanceId = attachment[ 'InstanceId' ]
         delOnTerm = attachment[ 'DeleteOnTermination' ]
+        instanceId = attachment[ 'InstanceId' ]
 
         if instanceId in allInstanceNames:
             NameTag = allInstanceNames[ instanceId ]
