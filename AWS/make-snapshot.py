@@ -1,5 +1,19 @@
 #!/usr/bin/python
 
+# This wants three args passed to it on the comand-line:
+# - NameTag: the Name tag of either the instance or the volume that is
+#   desired.  In the former case, all volumes attached to the instance
+#   will be snapshotted, in a way that is consistent across a reboot.
+#   And in the latter case, it just snapshots the specific volume
+#   you've provided the Name tag of.  In either case, the script won't
+#   snapshot anything without a Name tag.
+# - housekeeper: This is the tag that is used later by the delete
+#   script, to find the snapshots that need to be cleaned-up.
+# - description: what it says on the tin.  If you're feeling lazy, you
+#   can just pass the empty string in a pair of quotes.  I didn't
+#   really consider it worth my while to implement the logic for
+#   making this optional.
+
 import sys
 
 from boto3 import Session
@@ -17,8 +31,8 @@ def assert_singular( parentList, resourceType ):
     return( resource )
 
 NameTag     = sys.argv[1]
-description = sys.argv[2]
-housekeeper = sys.argv[3]
+housekeeper = sys.argv[2]
+description = sys.argv[3]
 
 cetacean = Session().client( service_name = 'ec2' )
 
@@ -47,8 +61,8 @@ match tag[ 'ResourceType' ]:
 
         response = cetacean.create_snapshot(
             Description = description,
-            VolumeId = rid,
-            TagSpecifications = tagspec )
+            TagSpecifications = tagspec,
+            VolumeId = rid )
 
         sid = response[ 'SnapshotId' ]
 

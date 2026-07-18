@@ -27,7 +27,9 @@ for s in snapshots:
 
     print( f'snapshotId = {sid}; volumeId = {vid}; size = {vsize} GiB;' )
 
-response = input( 'Continue? (y/n):' )
+print()
+
+response = input( 'Continue? (y/n): ' )
 
 if 'y' != response:
     sys.exit()
