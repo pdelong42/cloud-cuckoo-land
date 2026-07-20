@@ -18,12 +18,12 @@ import sys
 
 from boto3 import Session
 
-def assert_singular( parentList, resourceType ):
+def assert_singular( parentList, listName ):
 
-    resourceList = parentList[ resourceType ]
+    resourceList = [ t for t in parentList[ listName ] if 'instance' == t[ 'ResourceType' ] or 'volume' == t[ 'ResourceType' ] ]
 
     if 1 != len( resourceList ):
-        print( f'ERROR: {resourceType} non-singular' )
+        print( f'ERROR: resource is non-singular' )
         sys.exit( 1 )
 
     [ resource ] = resourceList
