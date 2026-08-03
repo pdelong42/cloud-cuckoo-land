@@ -3,7 +3,8 @@
 # ToDo:
 # - tear down resources in an orderly fashion;
 # - scrape the public IP and print it out as a URL for testing/verification;
-# - find a way to scale the service to zero so it can be deleted via API;
+# - find a way to scale the service's task count to zero so it can be deleted via API;
+#      aws ecs update-service --cluster basic-test --service basic-service --desired-count 0
 
 import sys
 import boto3
