@@ -1,10 +1,16 @@
 #!/usr/bin/python
 
 # ToDo:
-# - tear down resources in an orderly fashion;
 # - scrape the public IP and print it out as a URL for testing/verification;
+# - tear down resources in an orderly fashion;
 # - find a way to scale the service's task count to zero so it can be deleted via API;
 #      aws ecs update-service --cluster basic-test --service basic-service --desired-count 0
+# - may also be necessary:
+#      aws application-autoscaling register-scalable-target \
+#          --service-namespace ecs \
+#          --resource-id service/<your-cluster-name>/<your-service-name> \
+#          --scalable-dimension ecs:service:DesiredCount \
+#          --min-capacity 0
 
 import sys
 import boto3
@@ -101,3 +107,23 @@ print( dumps( service, default = str ), file = sys.stderr )
 # asymmetry in operations.  Perhaps it will become clearer to me over
 # time, or perhaps it's a holdover from how they implemented it and
 # they can't undo it so easily.
+
+# rough workflow for scraping a public IP:
+#
+# aws ecs list-task-definitions
+# aws ecs list-clusters
+# aws ecs describe-clusters --clusters basic-test --include ATTACHMENTS CONFIGURATIONS SETTINGS STATISTICS TAGS
+# aws ecs list-services --cluster basic-test
+# aws ecs describe-services --cluster basic-test --services basic-service
+# aws ecs list-tasks --cluster basic-test --service-name basic-service --query taskArns --output text > arn-task.txt
+# aws ecs describe-tasks --cluster basic-test --tasks $(<arn-task.txt) --query 'tasks[].attachments[].details[?name==`networkInterfaceId`].value' --output text > eni.txt
+# aws ec2 describe-network-interfaces --network-interface-ids $(<eni.txt)
+# aws ec2 describe-network-interfaces --network-interface-ids $(<eni.txt) --query 'NetworkInterfaces[].Association.PublicIp' --output text > ip-public.txt
+# aws ec2 describe-network-interfaces --network-interface-ids $(<eni.txt) --query 'NetworkInterfaces[].Association.PublicDnsName' --output text > dns-public.txt
+
+# rough workflow for teardown:
+#
+# aws ecs update-service --cluster basic-test --service basic-service --desired-count 0
+# aws ecs delete-service --cluster basic-test --service arn:aws:ecs:us-east-1:931886963281:service/basic-test/basic-service
+# aws ecs delete-cluster --cluster basic-test
+# aws ecs deregister-task-definition --task-definition arn:aws:ecs:us-east-1:931886963281:task-definition/sample-fargate-httpd-container:3
