@@ -35,6 +35,7 @@ def print_volume_modification( volmod ):
     target   = volmod[ 'TargetSize' ]
     started  = volmod[ 'StartTime' ]
     progress = volmod[ 'Progress' ]
+    volumeid = volmod[ 'VolumeId' ]
 
     ended = 'TBD'
     status = 'TBD'
@@ -47,7 +48,7 @@ def print_volume_modification( volmod ):
 
     print()
     print( f'state: {modstate}' )
-    print( f'growing volume from {original} GiB to {target} GiB, progress {progress}%' )
+    print( f'growing {volumeid} from {original} GiB to {target} GiB, progress {progress}%' )
     print( f'started: {started}' )
     print( f'ended:   {ended}' )
     print( f'status: {status}' )
