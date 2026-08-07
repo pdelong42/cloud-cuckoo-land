@@ -5,13 +5,13 @@ import copy
 
 from json import dumps
 from boto3 import Session
-from time import localtime, mktime, strftime
+from time import gmtime, mktime, strftime
 
 # for future consideration...
 #import datetime
 
-now = localtime()
-later = localtime( mktime( copy.replace( now, tm_mon = now.tm_mon + 1 ) ) )
+now = gmtime()
+later = gmtime( mktime( copy.replace( now, tm_mon = now.tm_mon + 1 ) ) )
 begin = strftime( '%Y-%m-01', now )
 today = strftime( '%Y-%m-%d', now )
 end = strftime( '%Y-%m-01', later )
