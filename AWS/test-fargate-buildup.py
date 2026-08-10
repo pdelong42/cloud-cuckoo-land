@@ -4,7 +4,7 @@
 # - scrape the public IP and print it out as a URL for testing/verification;
 # - tear down resources in an orderly fashion;
 # - find a way to scale the service's task count to zero so it can be deleted via API;
-#      aws ecs update-service --cluster basic-test --service basic-service --desired-count 0
+#      aws ecs update-service --cluster basic-cluster --service basic-service --desired-count 0
 # - may also be necessary:
 #      aws application-autoscaling register-scalable-target \
 #          --service-namespace ecs \
@@ -13,24 +13,13 @@
 #          --min-capacity 0
 
 import sys
+import time
 import boto3
 
 from json import dumps, loads
 
-session = boto3.session.Session()
-cetacean = session.client( service_name = 'ec2' )
-
-response = cetacean.describe_subnets()
-
-subnets = [ subnet[ 'SubnetId' ] for subnet in response[ 'Subnets' ] ]
-
-cetacean = session.client( service_name = 'ecs' )
-
-response = cetacean.create_cluster( clusterName = 'basic-test' )
-
-clusterArn = response[ 'cluster' ][ 'clusterArn' ]
-
-print( f'Created {clusterArn}' )
+cluster_name = 'basic-cluster'
+service_name = 'basic-service'
 
 taskdef = {
     "containerDefinitions": [
@@ -63,11 +52,26 @@ taskdef = {
     ]
 }
 
+session = boto3.session.Session()
+cetacean = session.client( service_name = 'ec2' )
+
+response = cetacean.describe_subnets()
+
+subnets = [ subnet[ 'SubnetId' ] for subnet in response[ 'Subnets' ] ]
+
+cetacean = session.client( service_name = 'ecs' )
+
 response = cetacean.register_task_definition( **loads( dumps( taskdef ) ) ) # footnote 1 #
 
 taskDefinitionArn = response[ 'taskDefinition' ][ 'taskDefinitionArn' ]
 
 print( f'Created {taskDefinitionArn}' )
+
+response = cetacean.create_cluster( clusterName = cluster_name )
+
+clusterArn = response[ 'cluster' ][ 'clusterArn' ]
+
+print( f'Created {clusterArn}' )
 
 response = cetacean.create_service(
     cluster = clusterArn,
@@ -79,7 +83,7 @@ response = cetacean.create_service(
             'subnets': subnets
         },
     },
-    serviceName = 'basic-service',
+    serviceName = service_name,
     taskDefinition = taskDefinitionArn )
 
 service = response[ 'service' ]
@@ -87,7 +91,59 @@ serviceArn = service[ 'serviceArn' ]
 
 print( f'Created {serviceArn}' )
 
-print( dumps( service, default = str ), file = sys.stderr )
+#print( dumps( service, default = str ), file = sys.stderr )
+
+task_count = 0
+
+while not 0 < task_count:
+
+    # not super elegant, but until I can think of a better idea...
+    print( 'Polling task list size on a one-second interval, until non-zero...' )
+    time.sleep( 1 )
+
+    response = cetacean.list_tasks( cluster = cluster_name, serviceName = service_name, launchType = 'FARGATE' )
+    taskArns = response[ 'taskArns' ]
+    task_count = len( taskArns )
+
+response = cetacean.describe_tasks( cluster = cluster_name, tasks = taskArns )
+
+#print( dumps( response, default = str ), file = sys.stderr )
+
+enis = []
+
+for task in response[ 'tasks' ]:
+    for attachment in task[ 'attachments' ]:
+        for detail in attachment[ 'details' ]:
+            if 'networkInterfaceId' == detail[ 'name' ]:
+                enis.append( detail[ 'value' ] )
+
+cetacean = session.client( service_name = 'ec2' )
+
+response = cetacean.describe_network_interfaces( NetworkInterfaceIds = enis )
+
+for nic in response[ 'NetworkInterfaces' ]:
+
+    assoc = nic[ 'Association' ]
+    ip = assoc[ 'PublicIp' ]
+    dns = assoc[ 'PublicDnsName' ]
+
+    print( f'Found DNS name and IP:' )
+    print( f'\t{dns}' )
+    print( f'\t{ip}' )
+
+# rough workflow for scraping a public IP:
+#
+# aws ecs list-task-definitions
+# aws ecs list-clusters
+# aws ecs describe-clusters --clusters basic-cluster --include ATTACHMENTS CONFIGURATIONS SETTINGS STATISTICS TAGS
+# aws ecs list-services --cluster basic-cluster
+# aws ecs describe-services --cluster basic-cluster --services basic-service
+# aws ecs list-tasks --cluster basic-cluster --service-name basic-service --query taskArns --output text > arn-task.txt
+# aws ecs describe-tasks --cluster basic-cluster --tasks $(<arn-task.txt) --query 'tasks[].attachments[].details[?name==`networkInterfaceId`].value' --output text > eni.txt
+# aws ec2 describe-network-interfaces --network-interface-ids $(<eni.txt)
+# aws ec2 describe-network-interfaces --network-interface-ids $(<eni.txt) --query 'NetworkInterfaces[].Association.PublicIp' --output text > ip-public.txt
+# aws ec2 describe-network-interfaces --network-interface-ids $(<eni.txt) --query 'NetworkInterfaces[].Association.PublicDnsName' --output text > dns-public.txt
+
 
 # Footnote 1:
 #
@@ -107,23 +163,3 @@ print( dumps( service, default = str ), file = sys.stderr )
 # asymmetry in operations.  Perhaps it will become clearer to me over
 # time, or perhaps it's a holdover from how they implemented it and
 # they can't undo it so easily.
-
-# rough workflow for scraping a public IP:
-#
-# aws ecs list-task-definitions
-# aws ecs list-clusters
-# aws ecs describe-clusters --clusters basic-test --include ATTACHMENTS CONFIGURATIONS SETTINGS STATISTICS TAGS
-# aws ecs list-services --cluster basic-test
-# aws ecs describe-services --cluster basic-test --services basic-service
-# aws ecs list-tasks --cluster basic-test --service-name basic-service --query taskArns --output text > arn-task.txt
-# aws ecs describe-tasks --cluster basic-test --tasks $(<arn-task.txt) --query 'tasks[].attachments[].details[?name==`networkInterfaceId`].value' --output text > eni.txt
-# aws ec2 describe-network-interfaces --network-interface-ids $(<eni.txt)
-# aws ec2 describe-network-interfaces --network-interface-ids $(<eni.txt) --query 'NetworkInterfaces[].Association.PublicIp' --output text > ip-public.txt
-# aws ec2 describe-network-interfaces --network-interface-ids $(<eni.txt) --query 'NetworkInterfaces[].Association.PublicDnsName' --output text > dns-public.txt
-
-# rough workflow for teardown:
-#
-# aws ecs update-service --cluster basic-test --service basic-service --desired-count 0
-# aws ecs delete-service --cluster basic-test --service arn:aws:ecs:us-east-1:931886963281:service/basic-test/basic-service
-# aws ecs delete-cluster --cluster basic-test
-# aws ecs deregister-task-definition --task-definition arn:aws:ecs:us-east-1:931886963281:task-definition/sample-fargate-httpd-container:3
