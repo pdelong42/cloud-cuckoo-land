@@ -20,6 +20,7 @@ import boto3
 
 from json import dumps, loads
 
+polling_interval = 3
 cluster_name = 'basic-cluster'
 service_name = 'basic-service'
 
@@ -51,8 +52,8 @@ print( f'Deleted service {serviceArn}' )
 while True:
 
     # not super elegant, but until I can think of a better idea...
-    print( 'Polling task list size on a one-second interval, until zero...' )
-    time.sleep( 1 )
+    print( f'Polling task list size on a {polling_interval}s interval, until zero...' )
+    time.sleep( polling_interval )
 
     response = cetacean.list_tasks( cluster = cluster_name, serviceName = service_name, launchType = 'FARGATE' )
     taskArns = response[ 'taskArns' ]

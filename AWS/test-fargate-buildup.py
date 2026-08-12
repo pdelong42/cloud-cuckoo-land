@@ -1,16 +1,12 @@
 #!/usr/bin/python
 
 # ToDo:
-# - scrape the public IP and print it out as a URL for testing/verification;
-# - tear down resources in an orderly fashion;
-# - find a way to scale the service's task count to zero so it can be deleted via API;
+# - [DONE] scrape the public IP and print it out as a URL for testing/verification;
+# - [DONE] tear down resources in an orderly fashion;
+# - [DONE] find a way to scale the service's task count to zero so it can be deleted via API;
 #      aws ecs update-service --cluster basic-cluster --service basic-service --desired-count 0
-# - may also be necessary:
-#      aws application-autoscaling register-scalable-target \
-#          --service-namespace ecs \
-#          --resource-id service/<your-cluster-name>/<your-service-name> \
-#          --scalable-dimension ecs:service:DesiredCount \
-#          --min-capacity 0
+# - write some logic to 'curl ifconfig.io' and add it to the default NSG
+# - start using some other NSG than the default one
 
 import sys
 import time
@@ -18,6 +14,7 @@ import boto3
 
 from json import dumps, loads
 
+polling_interval = 3
 cluster_name = 'basic-cluster'
 service_name = 'basic-service'
 
@@ -53,9 +50,9 @@ taskdef = {
 }
 
 session = boto3.session.Session()
-cetacean = session.client( service_name = 'ec2' )
+dolphin = session.client( service_name = 'ec2' )
 
-response = cetacean.describe_subnets()
+response = dolphin.describe_subnets()
 
 subnets = [ subnet[ 'SubnetId' ] for subnet in response[ 'Subnets' ] ]
 
@@ -98,28 +95,35 @@ task_count = 0
 while not 0 < task_count:
 
     # not super elegant, but until I can think of a better idea...
-    print( 'Polling task list size on a one-second interval, until non-zero...' )
-    time.sleep( 1 )
+    print( f'Polling task list size on a {polling_interval}s interval, until non-zero...' )
+    time.sleep( polling_interval )
 
     response = cetacean.list_tasks( cluster = cluster_name, serviceName = service_name, launchType = 'FARGATE' )
     taskArns = response[ 'taskArns' ]
     task_count = len( taskArns )
 
-response = cetacean.describe_tasks( cluster = cluster_name, tasks = taskArns )
-
-#print( dumps( response, default = str ), file = sys.stderr )
-
 enis = []
 
-for task in response[ 'tasks' ]:
-    for attachment in task[ 'attachments' ]:
-        for detail in attachment[ 'details' ]:
-            if 'networkInterfaceId' == detail[ 'name' ]:
-                enis.append( detail[ 'value' ] )
+# again, not as elegant as I'd like, but it gets the job done...
+while True:
 
-cetacean = session.client( service_name = 'ec2' )
+    response = cetacean.describe_tasks( cluster = cluster_name, tasks = taskArns )
 
-response = cetacean.describe_network_interfaces( NetworkInterfaceIds = enis )
+    #print( dumps( response, default = str ), file = sys.stderr )
+
+    for task in response[ 'tasks' ]:
+        for attachment in task[ 'attachments' ]:
+            for detail in attachment[ 'details' ]:
+                if 'networkInterfaceId' == detail[ 'name' ]:
+                    enis.append( detail[ 'value' ] )
+
+    print( f'Polling ENI list size on a {polling_interval}s interval, until non-zero...' )
+    time.sleep( polling_interval )
+
+    if 0 < len( enis ):
+        break
+
+response = dolphin.describe_network_interfaces( NetworkInterfaceIds = enis )
 
 for nic in response[ 'NetworkInterfaces' ]:
 
@@ -127,9 +131,9 @@ for nic in response[ 'NetworkInterfaces' ]:
     ip = assoc[ 'PublicIp' ]
     dns = assoc[ 'PublicDnsName' ]
 
-    print( f'Found DNS name and IP:' )
-    print( f'\t{dns}' )
-    print( f'\t{ip}' )
+    print( f'Found DNS name and IP, run either of the following commands to test:' )
+    print( f'\tcurl {dns}' )
+    print( f'\tcurl {ip}' )
 
 # rough workflow for scraping a public IP:
 #
