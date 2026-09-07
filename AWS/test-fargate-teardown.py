@@ -69,6 +69,14 @@ clusterArn = response[ 'cluster' ][ 'clusterArn' ]
 
 print( f'Deleted cluster {clusterArn}' )
 
+dolphin = session.client( service_name = 'ec2' )
+
+response = dolphin.delete_security_group( GroupName = 'temporary-verification' )
+#
+# when we switch to using a non-default VPC, GroupName will no longer be valid
+#    GroupId='string',
+#    VpcId = ''
+
 response = cetacean.deregister_task_definition( taskDefinition = task_definition )
 
 #print( dumps( response, default = str ), file = sys.stderr )

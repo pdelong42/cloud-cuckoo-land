@@ -1,22 +1,40 @@
 #!/usr/bin/python
 
 # ToDo:
-# - [DONE] scrape the public IP and print it out as a URL for testing/verification;
+# - [DONE] scrape the public IP and print it out as a URL for
+#   testing/verification;
 # - [DONE] tear down resources in an orderly fashion;
-# - [DONE] find a way to scale the service's task count to zero so it can be deleted via API;
+# - [DONE] find a way to scale the service's task count to zero so it
+#   can be deleted via API;
 #      aws ecs update-service --cluster basic-cluster --service basic-service --desired-count 0
-# - write some logic to 'curl ifconfig.io' and add it to the default NSG
-# - start using some other NSG than the default one
+# - [DONE] write some logic to 'curl checkip.amazonaws.com' and add it
+#   to the default NSG;
+# - [DONE] start using some other NSG than the default one;
+# - figure-out how to block-until-ready (or less ideally,
+#   poll-and-timeout) to make sure the service is listening before
+#   attempting to scrape its IP and declare success or failure on that
+#   basis;
+# - for the non-default NSG, start by using the default VPC, with an
+#   eye towards changing that later;
+# - separate the creation (and deletion) of task definitions into a
+#   separate workflow, because it's a bit overkill to create and
+#   delete them every time we instantiate a new cluster, service, or
+#   task (also suffix the name with the date, to minimize AWS
+#   numbering them for us);
 
 import sys
 import time
 import boto3
+import requests
 
 from json import dumps, loads
+from requests.utils import is_ipv4_address, is_ipv6_address
 
 polling_interval = 3
 cluster_name = 'basic-cluster'
 service_name = 'basic-service'
+ipcheck_url = 'http://checkip.amazonaws.com'
+#ipcheck_url = 'http://ifconfig.io/ip'
 
 taskdef = {
     "containerDefinitions": [
@@ -49,12 +67,41 @@ taskdef = {
     ]
 }
 
+response = requests.get( ipcheck_url )
+
+ip_perms = { 'FromPort': 80, 'IpProtocol': 'tcp', 'ToPort': 80 }
+ip_string = response.content.decode( 'utf-8' ).strip()
+
+if( is_ipv4_address( ip_string ) ):
+    ip_perms[ 'IpRanges' ] = [ { 'CidrIp': f'{ip_string}/32' } ]
+    #ip_perms[ 'IpRanges' ] = [ { 'Description': '', 'CidrIp': f'{ip_string}/32' } ]
+
+if( is_ipv6_address( ip_string ) ):
+    ip_perms[ 'Ipv6Ranges' ] = [ { 'CidrIpv6': f'{ip_string}/128' } ]
+    #ip_perms[ 'Ipv6Ranges' ] = [ { 'Description': '', 'CidrIpv6': f'{ip_string}/128' } ]
+
+if( not 'IpRanges' in ip_perms and not 'Ipv6Ranges' in ip_perms ):
+    print( 'ERROR: could not find a client IP address to authorize in NSG - aborting' )
+    sys.exit( 1 )
+
 session = boto3.session.Session()
 dolphin = session.client( service_name = 'ec2' )
 
 response = dolphin.describe_subnets()
 
 subnets = [ subnet[ 'SubnetId' ] for subnet in response[ 'Subnets' ] ]
+
+response = dolphin.create_security_group(
+    Description = 'temporary NSG for testing by rollout script',
+    GroupName = 'temporary-verification' )
+
+# this will be needed when we switch to using a non-default VPC
+#    VpcId = ''
+
+nsg_id = response[ 'GroupId' ]
+nsg_arn = response[ 'SecurityGroupArn' ]
+
+response = dolphin.authorize_security_group_ingress( GroupId = nsg_id, IpPermissions = [ ip_perms ] )
 
 cetacean = session.client( service_name = 'ecs' )
 
@@ -77,6 +124,7 @@ response = cetacean.create_service(
     networkConfiguration = {
         'awsvpcConfiguration': {
             'assignPublicIp': 'ENABLED',
+            'securityGroups': [ nsg_id ],
             'subnets': subnets
         },
     },
@@ -134,6 +182,14 @@ for nic in response[ 'NetworkInterfaces' ]:
     print( f'Found DNS name and IP, run either of the following commands to test:' )
     print( f'\tcurl {dns}' )
     print( f'\tcurl {ip}' )
+
+    url = f'http://{dns}'
+
+    print( f'Attempting to fetch {url}...' )
+
+    response = requests.get( url )
+
+    print( response.content )
 
 # rough workflow for scraping a public IP:
 #
