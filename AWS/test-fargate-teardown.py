@@ -28,6 +28,15 @@ session = boto3.session.Session()
 
 cetacean = session.client( service_name = 'ecs' )
 
+# This script will currently fail at the NSG deletion phase, because
+# the task takes time to get cleaned-up, and the logic in this script
+# doesn't wait long enough for that to happen before attempting the
+# NSG deletion.  To remedy that, follow these steps in outline:
+# - get the NSG ID from the service definition
+# - poll for ENIs using that NSG, with something like the following:
+#   aws ec2 describe-network-interfaces --filters Name=group-id,Values=sg-09a92659ed399549f
+# - delete the NSG when the polling finally returns a null result
+
 #responses = []
 
 response = cetacean.update_service( cluster = cluster_name, service = service_name, desiredCount = 0 )

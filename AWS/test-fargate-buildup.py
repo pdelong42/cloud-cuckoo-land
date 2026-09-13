@@ -150,25 +150,32 @@ while not 0 < task_count:
     taskArns = response[ 'taskArns' ]
     task_count = len( taskArns )
 
-enis = []
-
 # again, not as elegant as I'd like, but it gets the job done...
 while True:
 
+    enis = []
+    connectivity = ''
     response = cetacean.describe_tasks( cluster = cluster_name, tasks = taskArns )
 
     #print( dumps( response, default = str ), file = sys.stderr )
 
     for task in response[ 'tasks' ]:
+        if 'connectivity' in task:
+            connectivity = task[ 'connectivity' ]
         for attachment in task[ 'attachments' ]:
             for detail in attachment[ 'details' ]:
                 if 'networkInterfaceId' == detail[ 'name' ]:
                     enis.append( detail[ 'value' ] )
 
+    # This is sloppy because it doesn't wait for all tasks to have
+    # ENIs or connectivity, just one is good enough for it.  This
+    # should eventually change if I ever need to care about more than
+    # one task.
+
     print( f'Polling ENI list size on a {polling_interval}s interval, until non-zero...' )
     time.sleep( polling_interval )
 
-    if 0 < len( enis ):
+    if 'CONNECTED' == connectivity and 0 < len( enis ):
         break
 
 response = dolphin.describe_network_interfaces( NetworkInterfaceIds = enis )
