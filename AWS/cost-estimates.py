@@ -1,20 +1,20 @@
 #!/usr/bin/python
 
-#import sys
+import sys
 import copy
 
 from json import dumps
 from boto3 import Session
-from time import gmtime, mktime, strftime
+from time import localtime, mktime, strftime
 
 # for future consideration...
 #import datetime
 
-now = gmtime()
-later = gmtime( mktime( copy.replace( now, tm_mon = now.tm_mon + 1 ) ) )
+now = localtime()
 begin = strftime( '%Y-%m-01', now )
 today = strftime( '%Y-%m-%d', now )
-end = strftime( '%Y-%m-01', later )
+tomorrow = strftime( '%Y-%m-%d', localtime( mktime( copy.replace( now, tm_mday = now.tm_mday + 1 ) ) ) )
+end = strftime( '%Y-%m-01', localtime( mktime( copy.replace( now, tm_mon = now.tm_mon + 1 ) ) ) )
 
 cetacean = Session().client( service_name = 'ce' )
 
@@ -27,7 +27,7 @@ metrics = [ 'UnblendedCost' ]
 response = cetacean.get_cost_and_usage(
     Granularity = 'MONTHLY',
     Metrics = metrics,
-    TimePeriod = { 'Start': begin, 'End': today } )
+    TimePeriod = { 'Start': begin, 'End': tomorrow } )
 
 #print( dumps( response, default = str ), file = sys.stderr )
 
@@ -43,10 +43,14 @@ for r in response[ 'ResultsByTime' ]:
 
         print( f'\t...for metric "{m}": {amount:#.2f} {unit}' )
 
+if( tomorrow == end ):
+    print( f'Cannot forecast remainder of the month because this is the last day.' )
+    sys.exit()
+
 response = cetacean.get_cost_forecast(
     Granularity = 'MONTHLY',
     Metric = metric,
-    TimePeriod = { 'Start': today, 'End': end } )
+    TimePeriod = { 'Start': tomorrow, 'End': end } )
 
 #print( dumps( response, default = str ), file = sys.stderr )
 
